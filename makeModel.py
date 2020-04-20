@@ -28,13 +28,22 @@ training_filename = ['20_46_33.txt.csv',
 validating_filename = ['22_49_29.txt.csv',
                        '00_21_56.txt.csv']
 
+# Hyperparameters
+# model conditions
+input_layer_cnt = 128
+lstm_1_cnt = 128
+lstm_2_cnt = 128
+# training conditions
+epochs_cnt = 50
+batch_size_cnt = 16
+
 
 def trainingmodel(lossFun):
     # make model
     model = tf.keras.models.Sequential()
-    model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(128), input_shape=(16, 8)))
-    model.add(tf.keras.layers.LSTM(128, return_sequences=True, input_shape=(1, 128)))
-    model.add(tf.keras.layers.LSTM(128, return_sequences=False))
+    model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(input_layer_cnt), input_shape=(16, 8)))
+    model.add(tf.keras.layers.LSTM(lstm_1_cnt, return_sequences=True, input_shape=(1, input_layer_cnt)))
+    model.add(tf.keras.layers.LSTM(lstm_2_cnt, return_sequences=False))
     model.add(tf.keras.layers.Dense(2, activation='relu'))
 
     model.summary()
@@ -73,10 +82,18 @@ def trainingmodel(lossFun):
     hist = []
 
     # training
-    hist = model.fit(dataX_array, dataY_array, epochs=50, validation_data=(val_dataX_array, val_dataY_array), batch_size=16, verbose=2)
+    hist = model.fit(dataX_array, dataY_array, epochs=epochs_cnt, validation_data=(val_dataX_array, val_dataY_array), batch_size=batch_size_cnt, verbose=2)
 
     #get date
     now = str(datetime.datetime.now()).replace(" ", "-").replace(":", "-").replace(".", "_")
+
+    # write condition log
+    f = open('results/' + now + '_' + 'conditions.txt', 'w')
+    f.write("###model : input layer count-lstm 1 count-lstm 2 count##\n")
+    f.write("model : " + str(input_layer_cnt) + "-" + str(lstm_1_cnt) + "-" + str(lstm_2_cnt) + "\n")
+    f.write("###training : epochs count-batch size count##\n")
+    f.write("training : " + str(epochs_cnt) + "-" + str(batch_size_cnt) + "\n")
+    f.close()
 
     # save history of model
     # save visualiztion
