@@ -6,6 +6,8 @@ import datetime, time
 # Using GPU
 # tensorflow가 GPU를 사용하게 함
 gpus = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(gpus[0], True)
+
 
 # 테스트에 사용할 loss function 목록
 lossF = ['mean_absolute_error',
@@ -74,8 +76,7 @@ def trainingmodel(lossFun):
     hist = model.fit(dataX_array, dataY_array, epochs=50, validation_data=(val_dataX_array, val_dataY_array), batch_size=16, verbose=2)
 
     #get date
-    d = datetime.date.today()
-    now = d.year + '_' + d.month + '_' + d.day
+    now = str(datetime.datetime.now()).replace(" ", "-").replace(":", "-").replace(".", "_")
 
     # save history of model
     # save visualiztion
@@ -94,7 +95,7 @@ def trainingmodel(lossFun):
     loss_ax.legend(loc='upper left')
     acc_ax.legend(loc='lower left')
 
-    plt.savefig('result/' + now + '_' + lossFun + '.png')
+    plt.savefig('results/' + now + '_' + lossFun + '.png')
 
     # convert keras model to tflite
     # Save the model.
