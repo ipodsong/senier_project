@@ -34,7 +34,7 @@ input_layer_cnt = 128
 lstm_1_cnt = 128
 lstm_2_cnt = 128
 # training conditions
-epochs_cnt = 50
+epochs_cnt = 200
 batch_size_cnt = 16
 
 
@@ -44,7 +44,7 @@ def trainingmodel(lossFun):
     model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(input_layer_cnt), input_shape=(16, 8)))
     model.add(tf.keras.layers.LSTM(lstm_1_cnt, return_sequences=True, input_shape=(1, input_layer_cnt)))
     model.add(tf.keras.layers.LSTM(lstm_2_cnt, return_sequences=False))
-    model.add(tf.keras.layers.Dense(2, activation='relu'))
+    model.add(tf.keras.layers.Dense(1, activation='relu'))
 
     model.summary()
 
@@ -60,7 +60,7 @@ def trainingmodel(lossFun):
         data = np.loadtxt('data/' + k, delimiter=",")
         for i in range(len(data) - 15):
             dataX_list.append(data[i:i + 16, 0:9])
-            dataY_list.append(data[i + 15, 0:2])
+            dataY_list.append(data[i + 15, 1])
 
     dataX_array = np.array(dataX_list)
     dataY_array = np.array(dataY_list)
@@ -74,7 +74,7 @@ def trainingmodel(lossFun):
         data = np.loadtxt('data/' + k, delimiter=",")
         for i in range(len(data) - 15):
             val_dataX_list.append(data[i:i + 16, 0:9])
-            val_dataY_list.append(data[i + 15, 0:2])
+            val_dataY_list.append(data[i + 15, 1])
 
     val_dataX_array = np.array(val_dataX_list)
     val_dataY_array = np.array(val_dataY_list)
@@ -112,14 +112,14 @@ def trainingmodel(lossFun):
     loss_ax.legend(loc='upper left')
     acc_ax.legend(loc='lower left')
 
-    plt.savefig('results/' + now + '_' + lossFun + '.png')
+    plt.savefig('results/' + now + '_' + lossFun + '_speed.png')
 
     # convert keras model to tflite
     # Save the model.
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.experimental_new_converter = True
     tflite_model = converter.convert()
-    open("models/" + now + '_' + lossFun + ".tflite", "wb").write(tflite_model)
+    open("models/" + now + '_' + lossFun + "_speed.tflite", "wb").write(tflite_model)
 
 for lf in lossF:
     trainingmodel(lf)
