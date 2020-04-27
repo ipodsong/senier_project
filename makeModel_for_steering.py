@@ -34,7 +34,7 @@ input_layer_cnt = 128
 lstm_1_cnt = 128
 lstm_2_cnt = 128
 # training conditions
-epochs_cnt = 50
+epochs_cnt = 200
 batch_size_cnt = 16
 
 
@@ -112,14 +112,14 @@ def trainingmodel(lossFun):
     loss_ax.legend(loc='upper left')
     acc_ax.legend(loc='lower left')
 
-    plt.savefig('results/' + now + '_' + lossFun + '.png')
+    plt.savefig('results/' + now + '_' + lossFun + 'steering.png')
 
     # convert keras model to tflite
     # Save the model.
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     converter.experimental_new_converter = True
     tflite_model = converter.convert()
-    open("models/" + now + '_' + lossFun + ".tflite", "wb").write(tflite_model)
+    open("models/" + now + '_' + lossFun + "steering.tflite", "wb").write(tflite_model)
 
 for lf in lossF:
     trainingmodel(lf)
