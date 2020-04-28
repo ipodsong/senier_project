@@ -1,0 +1,4 @@
+###model : input layer count-lstm 1 count-lstm 2 count##
+model : 128-128-128
+###training : epochs count-batch size count##
+training : 50-16
