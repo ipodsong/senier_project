@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime, time
-
+import csv
 # Using GPU
 # tensorflow가 GPU를 사용하게 함
 gpus = tf.config.experimental.list_physical_devices('GPU')
@@ -10,11 +10,9 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 
 
 # 테스트에 사용할 loss function 목록
-#lossF = ['mean_absolute_error',
-#         'mean_squared_error',
-#         'mean_squared_logarithmic_error']
-
-lossF = ['mean_squared_logarithmic_error']
+lossF = ['mean_absolute_error',
+         'mean_squared_error',
+         'mean_squared_logarithmic_error']
 
 # Training data filename
 # Speed, Steering, 가속도계(x, y, z), 자이로스코프(pitch, roll, yaw) 값이 저장되어있는 csv 파일
@@ -36,7 +34,7 @@ input_layer_cnt = 128
 lstm_1_cnt = 128
 lstm_2_cnt = 128
 # training conditions
-epochs_cnt = 50
+epochs_cnt = 70
 batch_size_cnt = 16
 
 
@@ -64,12 +62,8 @@ def trainingmodel(lossFun):
             dataX_list.append(data[i:i + 16, 2:8])
             dataY_list.append(data[i + 15, 0:2])
 
-
     dataX_array = np.array(dataX_list)
     dataY_array = np.array(dataY_list)
-
-    print(dataX_array)
-    print(dataY_array)
 
     # make validation data
     val_dataX_array = []
@@ -81,7 +75,6 @@ def trainingmodel(lossFun):
         for i in range(len(data) - 15):
             val_dataX_list.append(data[i:i + 16, 2:8])
             val_dataY_list.append(data[i + 15, 0:2])
-
 
     val_dataX_array = np.array(val_dataX_list)
     val_dataY_array = np.array(val_dataY_list)
@@ -127,6 +120,31 @@ def trainingmodel(lossFun):
     converter.experimental_new_converter = True
     tflite_model = converter.convert()
     open("models/" + now + '_' + lossFun + ".tflite", "wb").write(tflite_model)
+
+    #predict
+    predict_X = []
+    predict_Y = []
+    predict_X_array = []
+    predict_Y_array = []
+    result_array = []
+    data_predict = np.loadtxt('data/22_18_48.txt.csv', delimiter=",")
+    for i in range(len(data_predict) - 15):
+        predict_X.append(data_predict[i:i + 16, 2:8])
+        predict_Y.append(data_predict[i + 15, 0:2])
+
+    predict_X_array = np.array(predict_X)
+    predict_Y_array = np.array(predict_Y)
+    print(predict_X_array[0])
+
+    result_array.append(model.predict(predict_X_array))
+
+    f2 = open('results/' + now + '_' + 'predict.csv', 'w', newline="")
+    writer = csv.writer(f2)
+    for k in result_array[0]:
+        writer.writerow([k[0], k[1]])
+
+    f2.close()
+
 
 for lf in lossF:
     trainingmodel(lf)
