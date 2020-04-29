@@ -12,7 +12,8 @@ tf.config.experimental.set_memory_growth(gpus[0], True)
 # 테스트에 사용할 loss function 목록
 lossF = ['mean_absolute_error',
          'mean_squared_error',
-         'mean_squared_logarithmic_error']
+         #'mean_squared_logarithmic_error'
+         ]
 
 # Training data filename
 # Speed, Steering, 가속도계(x, y, z), 자이로스코프(pitch, roll, yaw) 값이 저장되어있는 csv 파일
@@ -34,11 +35,12 @@ input_layer_cnt = 128
 lstm_1_cnt = 128
 lstm_2_cnt = 128
 # training conditions
-epochs_cnt = 70
+epochs_cnt = [10, 30, 50, 70, 100, 200]
 batch_size_cnt = 16
 
 
-def trainingmodel(lossFun):
+
+def trainingmodel(lossFun, ep_cnt):
     # make model
     model = tf.keras.models.Sequential()
     model.add(tf.keras.layers.TimeDistributed(tf.keras.layers.Dense(input_layer_cnt), input_shape=(16, 6)))
@@ -82,7 +84,7 @@ def trainingmodel(lossFun):
     hist = []
 
     # training
-    hist = model.fit(dataX_array, dataY_array, epochs=epochs_cnt, validation_data=(val_dataX_array, val_dataY_array), batch_size=batch_size_cnt, verbose=2)
+    hist = model.fit(dataX_array, dataY_array, epochs=ep_cnt, validation_data=(val_dataX_array, val_dataY_array), batch_size=batch_size_cnt, verbose=2)
 
     #get date
     now = str(datetime.datetime.now()).replace(" ", "-").replace(":", "-").replace(".", "_")
@@ -134,7 +136,6 @@ def trainingmodel(lossFun):
 
     predict_X_array = np.array(predict_X)
     predict_Y_array = np.array(predict_Y)
-    print(predict_X_array[0])
 
     result_array.append(model.predict(predict_X_array))
 
@@ -146,15 +147,9 @@ def trainingmodel(lossFun):
     f2.close()
 
 
-for lf in lossF:
-    trainingmodel(lf)
-
-
-
-
-
-
-
+for ep in epochs_cnt:
+    for lf in lossF:
+        trainingmodel(lf, ep)
 
 
 
